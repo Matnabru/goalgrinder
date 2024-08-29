@@ -1,102 +1,108 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={<Ionicons size={310} name="code-slash" style={styles.headerImage} />}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText> library
-          to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
+interface Routine {
+  id: string;
+  days: number;
+  title: string;
+  description: string;
+  completed: boolean;
 }
 
+const Checklist: React.FC = () => {
+  const [routines, setRoutines] = useState<Routine[]>([
+    { id: '1', days: 5, title: 'Morning Exercise', description: 'Daily workout for 30 minutes', completed: true },
+    { id: '2', days: 3, title: 'Read a Book', description: 'Read at least 20 pages', completed: false },
+    // Add more routines here
+  ]);
+
+  const toggleComplete = (id: string) => {
+    setRoutines(prevRoutines =>
+      prevRoutines.map(routine =>
+        routine.id === id ? { ...routine, completed: !routine.completed } : routine
+      )
+    );
+  };
+
+  const renderItem = ({ item }: { item: Routine }) => (
+    <LinearGradient colors={['#4b4b4b', '#2b2b2b']} style={styles.routineItem}>
+      <View style={styles.dayCount}>
+        <Text style={styles.dayCountText}>{item.days}</Text>
+      </View>
+      <View style={styles.routineTextContainer}>
+        <Text style={styles.routineTitle}>{item.title}</Text>
+        <Text style={styles.routineDescription}>{item.description}</Text>
+      </View>
+      <TouchableOpacity onPress={() => toggleComplete(item.id)}>
+        <View style={styles.checkBox}>
+          {item.completed && <Text style={styles.checkMark}>✔</Text>}
+        </View>
+      </TouchableOpacity>
+    </LinearGradient>
+  );
+
+  return (
+    <LinearGradient colors={['#1b1b1b', '#0b0b0b']} style={styles.container}>
+      <FlatList
+        data={routines}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+      />
+    </LinearGradient>
+  );
+};
+
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    padding: 20,
   },
-  titleContainer: {
+  routineItem: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  dayCount: {
+    marginRight: 10,
+    backgroundColor: '#292929',
+    borderRadius: 50,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayCountText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  routineTextContainer: {
+    flex: 1,
+  },
+  routineTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  routineDescription: {
+    color: '#AAAAAA',
+    fontSize: 14,
+  },
+  checkBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: '#00FF00',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkMark: {
+    color: '#00FF00',
+    fontSize: 18,
   },
 });
+
+export default Checklist;
